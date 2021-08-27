@@ -88,3 +88,79 @@ vposConsume方法：
 
 ![image-20210813105803600](work.assets/image-20210813105803600.png)
 
+#### 第二种：启动定时任务
+
+1：新建具体业务的定时类BookTask.java
+
+![image-20210816095251504](work.assets/image-20210816095251504.png)
+
+2:根据业务实体类的修改时间去进行同步更新信息
+
+![image-20210816095326898](work.assets/image-20210816095326898.png)
+
+​							![image-20210816095640674](work.assets/image-20210816095640674.png)
+
+![image-20210816095713866](work.assets/image-20210816095713866.png)
+
+```
+BigDataWrapper类用于封装发送MQ的封装类 
+```
+
+```java
+StorageDepositAllot              寄存柜类
+StorageEquipmentAllotHistory     器材柜分配表  
+StorageUserAllot                 储物柜用户分配表  
+StoragePrizeHistory              兑奖柜 兑奖记录
+StorageNutritionCabinetHistory   营养柜-格子分配    
+```
+
+![image-20210819115133428](work.assets/image-20210819115133428.png)
+
+![image-20210819115147902](work.assets/image-20210819115147902.png)
+
+```
+public void sendBigdataMsg(List<BigDataWrapper> bigDataWrapperList){
+    bigDataWrapperList.forEach(bigDataWrapper -> {
+        rocketMQService.sendMessage(QueueTopic.TERMINAL_BIG_DATA_MSG,AppType.VSTORAGE,bigDataWrapper.toJsonBytes());
+    });
+}
+```
+
+消费-补贴规则制定
+
+
+
+
+
+消费-补贴规则使用
+
+1️⃣：每日上限
+
+2️⃣：单次限比  百分比
+
+3️⃣：每月上限
+
+
+
+每日上限的金额存进redis缓存当中:
+
+​		当用户查询没有时,设置value值为0,把每日上限存进redis,key是用户id+BaseRedisKey,过期时间是24小时减去当前时间。
+
+​		当用户查询存在相对应的redis,取出redis。
+
+
+
+业务逻辑：
+
+1：先查询是否有补贴金额。
+
+2：商品价格乘以单次限比得到本次消费的补贴最多能多少。与用户的补贴进行比较，如果用户剩下的补贴不够的话，就直接用剩下的补贴，够的话直接按照单次限比的补贴。
+
+3：从每日上限Redis取出value，进行相加，与每日限额进行比较，大于发出警告，小于没事。
+
+4：从每月上限Redis取出value，进行相加，与每日限额进行比较，大于发出警告，小于没事。
+
+5：对用户剩下的补贴金额进行更新，返回本次消费真正可以使用的补贴金。
+
+
+
