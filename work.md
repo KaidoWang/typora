@@ -116,6 +116,8 @@ StorageNutritionCabinetHistory   营养柜-格子分配
 
 ![image-20210819115133428](work.assets/image-20210819115133428.png)
 
+
+
 ![image-20210819115147902](work.assets/image-20210819115147902.png)
 
 ```
@@ -125,6 +127,10 @@ public void sendBigdataMsg(List<BigDataWrapper> bigDataWrapperList){
     });
 }
 ```
+
+### Git+Typora
+
+git add work.md -> git commit -m "typora" ->git push origin master
 
 消费-补贴规则制定
 
